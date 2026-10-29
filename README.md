@@ -1,8 +1,8 @@
-# Formula E Gen3 Evo — Pit-Wall Telemetry & Driver Performance Analyzer
+# Formula E Gen3 Evo - Pit-Wall Telemetry & Driver Performance Analyzer
 
 A real-time motorsport telemetry microservice and interactive Pit-Wall Engineering Dashboard built with **FastAPI**, **Pydantic v2**, **Matplotlib**, and **Jinja2**.
 
-Designed around the **FIA Formula E Gen3 Evo** technical regulations, this project evaluates lap-by-lap driver energy management—specifically MGU regenerative braking harvest in heavy braking zones and lift-and-coast execution—to compute an overall **Efficiency Score (0–100)**, detect hardware sensor anomalies, render dark-themed pit-wall telemetry charts, and generate actionable race engineering feedback.
+Designed around the **FIA Formula E Gen3 Evo** technical regulations, this project evaluates lap-by-lap driver energy management-specifically MGU regenerative braking harvest in heavy braking zones and lift-and-coast execution - to compute an overall **Efficiency Score (0–100)**, detect hardware sensor anomalies, render dark-themed pit-wall telemetry charts, and generate actionable race engineering feedback.
 
 ---
 ![Alt text](https://github.com/Steven-Furlong/fe-driver-performance/blob/main/showcase_1.png?raw=true)
