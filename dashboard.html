@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Formula E Gen3 Evo — Pit-Wall Driver Performance Dashboard</title>
+    <style>
+        :root {
+            --bg-dark: #070b12;
+            --panel-bg: #0f1624;
+            --panel-border: #1e2a3a;
+            --cyan: #00f0ff;
+            --volt: #39ff14;
+            --gold: #ffd700;
+            --red: #ff3366;
+            --text-main: #e6edf3;
+            --text-muted: #8b949e;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.5;
+            padding: 24px;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--cyan);
+            padding-bottom: 16px;
+            margin-bottom: 24px;
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .brand-badge {
+            background: linear-gradient(135deg, var(--cyan), var(--volt));
+            color: #000;
+            font-weight: 900;
+            padding: 6px 12px;
+            border-radius: 4px;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+        }
+        h1 {
+            font-size: 1.5rem;
+            letter-spacing: 0.5px;
+            color: var(--text-main);
+        }
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 24px;
+        }
+        @media (max-width: 960px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+        .panel-title {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--cyan);
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--panel-border);
+            padding-bottom: 8px;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+        label span.val {
+            color: var(--cyan);
+            font-weight: 700;
+        }
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            background: #070b12;
+            border: 1px solid var(--panel-border);
+            color: var(--text-main);
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--cyan);
+            cursor: pointer;
+        }
+        .presets {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .btn-preset {
+            background: #162032;
+            color: var(--text-main);
+            border: 1px solid var(--panel-border);
+            padding: 7px 10px;
+            border-radius: 4px;
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .btn-preset:hover {
+            border-color: var(--cyan);
+            color: var(--cyan);
+        }
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(90deg, var(--cyan), var(--volt));
+            color: #05080f;
+            border: none;
+            padding: 12px;
+            font-weight: 800;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .kpi-card {
+            background: #090e18;
+            border: 1px solid var(--panel-border);
+            border-radius: 6px;
+            padding: 16px;
+            text-align: center;
+        }
+        .kpi-label {
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.8px;
+        }
+        .kpi-value {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-top: 6px;
+            color: var(--cyan);
+        }
+        .rating-EXCELLENT { color: var(--volt); }
+        .rating-OPTIMAL { color: var(--gold); }
+        .rating-NEEDS_IMPROVEMENT { color: var(--red); }
+        .sensor-ok { color: var(--volt); }
+        .sensor-fault { color: var(--red); }
+        .chart-container {
+            background: #0a0e17;
+            border: 1px solid var(--panel-border);
+            border-radius: 6px;
+            padding: 12px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .chart-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+        .feedback-list {
+            list-style: none;
+        }
+        .feedback-list li {
+            background: #090e18;
+            border-left: 4px solid var(--cyan);
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            border-radius: 0 4px 4px 0;
+            font-size: 0.92rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="brand">
+            <span class="brand-badge">GEN3 EVO</span>
+            <div>
+                <h1>Formula E Pit-Wall Telemetry &amp; Driver Performance</h1>
+                <div class="subtitle">Real-Time MGU Regeneration &amp; Lift-and-Coast Efficiency Analyzer</div>
+            </div>
+        </div>
+        <div class="subtitle">Max Limit: 600 kW | Heavy Zone Target: &ge; 500 kW | Coast Target: &ge; 50m</div>
+    </header>
+
+    <div class="grid">
+        <section class="panel">
+            <h2 class="panel-title">Telemetry Input Controls</h2>
+            <div class="presets">
+                <button type="button" class="btn-preset" onclick="applyPreset(545, 520, 54)">Optimal Lap (100)</button>
+                <button type="button" class="btn-preset" onclick="applyPreset(530, 510, 35)">Marginal Coast (75)</button>
+                <button type="button" class="btn-preset" onclick="applyPreset(650, 525, 55)">650kW Sensor Fault</button>
+                <button type="button" class="btn-preset" onclick="applyPreset(410, 390, 15)">Under-Regen Lap (0)</button>
+            </div>
+
+            <form id="telemetry-form" onsubmit="submitTelemetry(event)">
+                <div class="form-group">
+                    <label for="driver_id">Driver / Car ID</label>
+                    <input type="text" id="driver_id" value="{{ telemetry.driver_id }}" />
+                </div>
+                <div class="form-group">
+                    <label for="lap_number">Lap Number</label>
+                    <input type="number" id="lap_number" min="1" max="99" value="{{ telemetry.lap_number }}" />
+                </div>
+                <div class="form-group">
+                    <label for="turn_3_regen_kw">
+                        <span>Turn 3 Peak Regen (Heavy Zone)</span>
+                        <span class="val" id="t3_val">{{ "%.0f"|format(telemetry.turn_3_regen_kw) }} kW</span>
+                    </label>
+                    <input type="range" id="turn_3_regen_kw" min="100" max="700" step="5"
+                           value="{{ telemetry.turn_3_regen_kw }}"
+                           oninput="document.getElementById('t3_val').textContent = this.value + ' kW'" />
+                </div>
+                <div class="form-group">
+                    <label for="turn_13_regen_kw">
+                        <span>Turn 13 Peak Regen (Heavy Zone)</span>
+                        <span class="val" id="t13_val">{{ "%.0f"|format(telemetry.turn_13_regen_kw) }} kW</span>
+                    </label>
+                    <input type="range" id="turn_13_regen_kw" min="100" max="700" step="5"
+                           value="{{ telemetry.turn_13_regen_kw }}"
+                           oninput="document.getElementById('t13_val').textContent = this.value + ' kW'" />
+                </div>
+                <div class="form-group">
+                    <label for="lift_and_coast_m">
+                        <span>Lift-and-Coast Distance</span>
+                        <span class="val" id="coast_val">{{ "%.0f"|format(telemetry.lift_and_coast_m) }} m</span>
+                    </label>
+                    <input type="range" id="lift_and_coast_m" min="0" max="100" step="1"
+                           value="{{ telemetry.lift_and_coast_m }}"
+                           oninput="document.getElementById('coast_val').textContent = this.value + ' m'" />
+                </div>
+                <button type="submit" class="btn-submit">Evaluate Lap Telemetry</button>
+            </form>
+        </section>
+
+        <section class="panel">
+            <h2 class="panel-title">Pit-Wall Engineering Telemetry Analysis</h2>
+            <div class="kpi-row">
+                <div class="kpi-card">
+                    <div class="kpi-label">Efficiency Score</div>
+                    <div class="kpi-value" id="score-display">{{ evaluation.efficiency_score }}/100</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">Performance Rating</div>
+                    <div class="kpi-value rating-{{ evaluation.rating }}" id="rating-display">{{ evaluation.rating }}</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-label">MGU Sensor Status</div>
+                    <div class="kpi-value {% if evaluation.sensor_fault_detected %}sensor-fault{% else %}sensor-ok{% endif %}" id="sensor-display">
+                        {% if evaluation.sensor_fault_detected %}FAULT (&gt;600kW){% else %}NOMINAL{% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <img id="telemetry-chart"
+                     src="data:image/png;base64,{{ chart_base64 }}"
+                     alt="Formula E Lap Regeneration Telemetry Chart" />
+            </div>
+
+            <h3 class="panel-title">Race Engineer Actionable Feedback</h3>
+            <ul class="feedback-list" id="feedback-list">
+                {% for item in evaluation.feedback %}
+                <li>{{ item }}</li>
+                {% endfor %}
+            </ul>
+        </section>
+    </div>
+
+    <script>
+        function applyPreset(t3, t13, coast) {
+            document.getElementById('turn_3_regen_kw').value = t3;
+            document.getElementById('t3_val').textContent = t3 + ' kW';
+            document.getElementById('turn_13_regen_kw').value = t13;
+            document.getElementById('t13_val').textContent = t13 + ' kW';
+            document.getElementById('lift_and_coast_m').value = coast;
+            document.getElementById('coast_val').textContent = coast + ' m';
+            document.getElementById('telemetry-form').requestSubmit();
+        }
+
+        async function submitTelemetry(event) {
+            event.preventDefault();
+            const driver_id = document.getElementById('driver_id').value || 'GEN3-EVO-01';
+            const lap_number = parseInt(document.getElementById('lap_number').value || '1', 10);
+            const turn_3_regen_kw = parseFloat(document.getElementById('turn_3_regen_kw').value);
+            const turn_13_regen_kw = parseFloat(document.getElementById('turn_13_regen_kw').value);
+            const lift_and_coast_m = parseFloat(document.getElementById('lift_and_coast_m').value);
+
+            const response = await fetch('/api/v1/evaluate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    driver_id,
+                    lap_number,
+                    turn_3_regen_kw,
+                    turn_13_regen_kw,
+                    lift_and_coast_m
+                })
+            });
+            const data = await response.json();
+
+            document.getElementById('score-display').textContent = data.efficiency_score + '/100';
+            const ratingEl = document.getElementById('rating-display');
+            ratingEl.textContent = data.rating;
+            ratingEl.className = 'kpi-value rating-' + data.rating;
+
+            const sensorEl = document.getElementById('sensor-display');
+            if (data.sensor_fault_detected) {
+                sensorEl.textContent = 'FAULT (>600kW)';
+                sensorEl.className = 'kpi-value sensor-fault';
+            } else {
+                sensorEl.textContent = 'NOMINAL';
+                sensorEl.className = 'kpi-value sensor-ok';
+            }
+
+            const feedbackList = document.getElementById('feedback-list');
+            feedbackList.innerHTML = '';
+            data.feedback.forEach(msg => {
+                const li = document.createElement('li');
+                li.textContent = msg;
+                feedbackList.appendChild(li);
+            });
+
+            const params = new URLSearchParams({
+                driver_id,
+                lap_number,
+                turn_3_regen_kw,
+                turn_13_regen_kw,
+                lift_and_coast_m,
+                t: Date.now()
+            });
+            document.getElementById('telemetry-chart').src = '/api/v1/chart?' + params.toString();
+        }
+    </script>
+</body>
+</html>
